@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVINDHA - Automated Verification Dashboard Assurance</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SheetJS for Export Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .main-menu-active { background-color: #0284c7; color: #ffffff; font-weight: 600; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .main-menu-inactive { color: #94a3b8; }
+        .main-menu-inactive:hover { background-color: #1e293b; color: #ffffff; }
+        .tab-active { border-bottom: 3px solid #0284c7; color: #0284c7; font-weight: 600; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col relative">
+
+    <!-- 0. SCREEN LOGIN OVERLAY -->
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="text-center mb-6">
+                <div class="inline-flex p-3 bg-red-600/20 text-red-500 border border-red-500/30 rounded-2xl mb-3 shadow-inner">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">AVINDHA Dashboard</h2>
+                <p class="text-xs text-slate-400 mt-1">Service Assurance & Quality Control System</p>
+                
+                <div class="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-[10px] text-sky-400 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> PostgreSQL Database Connected
+                </div>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Username / NIK</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 absolute left-3 top-3 text-slate-500"></i>
+                        <input type="text" id="login-username" required placeholder="Masukkan username" autocomplete="username" class="w-full bg-slate-950 text-xs text-white pl-9 pr-4 py-2.5 border border-slate-800 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-3 text-slate-500"></i>
+                        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" class="w-full bg-slate-950 text-xs text-white pl-9 pr-4 py-2.5 border border-slate-800 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-medium flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                    <span>Username atau password salah!</span>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-sky-600/20 transition flex items-center justify-center gap-2 mt-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Masuk Dashboard
+                </button>
+            </form>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 text-center">
+                <p class="text-[11px] text-slate-500">Belum punya akun? Hubungi Supervisor untuk dibuatkan akses.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <div id="app-content" class="hidden min-h-screen flex flex-col">
+        <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-red-600 p-2 rounded-lg text-white">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg leading-tight">AVINDHA Dashboard</h1>
+                            <p class="text-xs text-slate-400">Automated Verification Dashboard Assurance</p>
+                        </div>
+                    </div>
+
+                    <nav class="hidden md:flex bg-slate-800 p-1 rounded-xl border border-slate-700/60 ml-4 space-x-1">
+                        <button onclick="switchMainMenu('ivr')" id="menu-btn-ivr" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition main-menu-active">
+                            <i data-lucide="phone-call" class="w-4 h-4"></i> IVR
+                        </button>
+                        <button onclick="switchMainMenu('grapari-indihome')" id="menu-btn-grapari-indihome" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition main-menu-inactive">
+                            <i data-lucide="home" class="w-4 h-4"></i> GOL Indihome
+                        </button>
+                        <button onclick="switchMainMenu('grapari-mobile')" id="menu-btn-grapari-mobile" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition main-menu-inactive">
+                            <i data-lucide="smartphone" class="w-4 h-4"></i> GOL Mobile
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <div id="cloud-sync-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-sky-950/80 border border-sky-800 text-sky-300 rounded-xl text-[11px] font-semibold">
+                        <i data-lucide="database" class="w-3.5 h-3.5 text-sky-400"></i> PostgreSQL API Active
+                    </div>
+
+                    <div class="hidden sm:flex items-center gap-2 px-3 py-1 bg-slate-800 border border-slate-700/80 rounded-xl">
+                        <div class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs uppercase" id="user-avatar-initial">T</div>
+                        <div class="text-left">
+                            <p class="text-xs font-semibold text-slate-200" id="user-display-name">QA Tester</p>
+                            <p class="text-[10px] text-slate-400 font-mono capitalize" id="user-display-role">Tester</p>
+                        </div>
+                    </div>
+
+                    <button onclick="exportToExcel()" title="Export Excel (.xlsx)" class="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition shadow-sm flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="exportJSON()" title="Backup Data JSON" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center justify-center">
+                        <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                    </button>
+                    <label title="Import Backup JSON" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-lg transition flex items-center justify-center cursor-pointer">
+                        <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i>
+                        <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                    </label>
+                    <button id="btn-clear-all" onclick="clearAllData()" title="Clear All Data" class="p-2.5 bg-red-900/40 text-red-300 hover:bg-red-900/70 border border-red-800/50 rounded-lg transition flex items-center justify-center">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="handleLogout()" title="Logout System" class="p-2.5 bg-slate-800 hover:bg-rose-900/50 text-rose-400 border border-slate-700 hover:border-rose-800 rounded-lg transition flex items-center justify-center">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-16 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex space-x-8">
+                    <button onclick="switchSubTab('dashboard')" id="tab-dashboard" class="py-4 text-sm font-medium flex items-center gap-2 tab-active">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard Overview
+                    </button>
+                    <button onclick="switchSubTab('data-table')" id="tab-data-table" class="py-4 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4"></i> Data Test Case (<span id="total-badge">0</span>)
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="openJourneyModal()" id="btn-journey-map" class="py-1.5 px-3 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                        <i data-lucide="git-fork" class="w-4 h-4 text-amber-400"></i> <span id="btn-journey-map-label">IVR Journey Map</span>
+                    </button>
+
+                    <span id="active-system-tag" class="px-2.5 py-1 text-xs font-semibold bg-sky-100 text-sky-800 rounded-full border border-sky-200 flex items-center gap-1">
+                        <i data-lucide="phone-call" class="w-3 h-3"></i> Modul: Testing IVR
+                    </span>
+                    <button onclick="openAddModal()" class="py-2 px-4 text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Record Test
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+            <!-- VIEW 1: DASHBOARD OVERVIEW -->
+            <div id="view-dashboard" class="space-y-6">
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-900 text-white p-5 rounded-2xl shadow-md border border-slate-700/60 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="p-4 bg-sky-500/20 border border-sky-400/30 rounded-2xl text-sky-400">
+                            <i data-lucide="activity" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-base font-bold tracking-wide">System Health Index</h2>
+                                <span id="sla-readiness-badge" class="px-2.5 py-0.5 text-[11px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase tracking-wider">
+                                    🟢 SLA EXCELLENT
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-300 mt-1" id="health-description">Module health percentage based on functional testing results.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6 bg-slate-950/40 px-6 py-3 rounded-xl border border-white/10 w-full md:w-auto justify-between md:justify-end">
+                        <div class="text-center">
+                            <p class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Health Score</p>
+                            <p class="text-2xl font-black text-sky-400 mt-0.5" id="metric-health-score">0%</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-700"></div>
+                        <div class="text-center">
+                            <p class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Critical Defects</p>
+                            <p class="text-2xl font-black text-rose-400 mt-0.5" id="metric-critical-count">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Test Cases</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="metric-total">0</h3>
+                            <p class="text-xs text-slate-400 mt-1">Listed Scenario</p>
+                        </div>
+                        <div class="p-3 bg-slate-100 rounded-lg text-slate-600">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Passed</p>
+                            <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="metric-passed">0</h3>
+                            <p class="text-xs text-emerald-600/70 mt-1" id="metric-passed-pct">0% of total</p>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-rose-600 uppercase tracking-wider">Failed</p>
+                            <h3 class="text-2xl font-bold text-rose-600 mt-1" id="metric-failed">0</h3>
+                            <p class="text-xs text-rose-600/70 mt-1" id="metric-failed-pct">0% of total</p>
+                        </div>
+                        <div class="p-3 bg-rose-50 rounded-lg text-rose-600">
+                            <i data-lucide="x-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider">Pending / Untested</p>
+                            <h3 class="text-2xl font-bold text-amber-600 mt-1" id="metric-pending">0</h3>
+                            <p class="text-xs text-amber-600/70 mt-1" id="metric-pending-pct">0% of total</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg text-amber-600">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-sky-600"></i> Percentage of Test Results
+                        </h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                        <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-sky-600"></i> <span id="category-chart-title">Test Results by Product Type</span>
+                        </h3>
+                        <div class="h-64">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">
+                        <i data-lucide="compass" class="w-4 h-4 text-sky-600"></i> Customer Journey Impact Breakdown
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Based on Customer Experience</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="journey-impact-container"></div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i> Finding Issues and Improvement Suggestions
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">List of test cases with issue notes or improvement recommendations</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="copyIssueSummary()" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Summary
+                            </button>
+                            <button onclick="exportToExcel('issues')" class="px-3 py-1.5 text-xs font-medium bg-white hover:bg-slate-100 border border-slate-300 rounded-lg flex items-center gap-1.5 text-slate-700 shadow-sm">
+                                <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> Unduh Tabel Temuan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] tracking-wider font-semibold" id="issue-table-head"></thead>
+                            <tbody id="issue-table-body" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: DATA TABLE -->
+            <div id="view-data-table" class="hidden space-y-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="search-input" oninput="renderTable()" placeholder="Cari provider, no telp, capability, detail alur..." class="pl-9 pr-4 py-2 w-full text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        </div>
+                        <select id="filter-result" onchange="renderTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <option value="ALL">Semua Status</option>
+                            <option value="Passed">Passed</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Pending">Pending / Untested</option>
+                        </select>
+                        <select id="filter-severity" onchange="renderTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <option value="ALL">Semua Severity</option>
+                            <option value="Critical">Critical</option>
+                            <option value="Major">Major</option>
+                            <option value="Minor">Minor</option>
+                        </select>
+                        <select id="filter-category" onchange="renderTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none"></select>
+                        <select id="sort-date" onchange="renderTable()" class="px-3 py-2 text-xs border border-amber-300 bg-amber-50/50 text-slate-700 font-semibold rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none flex items-center">
+                            <option value="DESC">📅 Tanggal Terbaru</option>
+                            <option value="ASC">📅 Tanggal Terlama</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quick Filter:</span>
+                            <button onclick="setQuickFilter('ALL')" class="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 text-slate-600 rounded-md hover:bg-slate-200 transition">Semua</button>
+                            <button onclick="setQuickFilter('Failed')" class="px-2.5 py-1 text-[11px] font-semibold bg-rose-100 text-rose-700 rounded-md hover:bg-rose-200 transition">🔴 Hanya Failed</button>
+                            <button onclick="setQuickFilter('Critical')" class="px-2.5 py-1 text-[11px] font-semibold bg-red-600 text-white rounded-md hover:bg-red-700 transition">⚠️ Critical Only</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500 whitespace-nowrap">
+                                Total: <strong id="filtered-count" class="text-slate-800">0</strong> item
+                            </span>
+                            <button onclick="exportToExcel('all')" class="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> Download Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                        <table class="w-full text-left text-xs relative">
+                            <thead class="bg-slate-900 text-white uppercase text-[10px] tracking-wider sticky top-0 z-10" id="table-head-dynamic"></thead>
+                            <tbody id="main-table-body" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL 1: JOURNEY MAP REFERENCE -->
+    <div id="journey-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 text-slate-100 rounded-2xl shadow-2xl w-full max-w-5xl border border-slate-700 overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="px-6 py-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-red-600 text-white rounded-lg">
+                        <i data-lucide="git-fork" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white" id="modal-journey-title">Journey Map & QA Architecture</h3>
+                        <p class="text-[11px] text-slate-400">Panduan Komprehensif Alur Navigasi, Syarat, & Matrix Pengujian QA</p>
+                    </div>
+                </div>
+                <button onclick="closeJourneyModal()" class="text-slate-400 hover:text-white transition p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs" id="modal-journey-content"></div>
+            <div class="px-6 py-3 bg-slate-800 border-t border-slate-700 flex justify-end">
+                <button onclick="closeJourneyModal()" class="px-4 py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition">Tutup Panduan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: FORM RECORD TEST CASE -->
+    <div id="test-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i> Form Record Test
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form id="modal-form" onsubmit="saveTestCase(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="form-id">
+                <input type="hidden" id="form-evidence-data">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Testing</label>
+                        <input type="date" id="form-date" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Status Hasil Test</label>
+                        <select id="form-result" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none font-semibold">
+                            <option value="Passed" class="text-emerald-600 font-bold">Passed</option>
+                            <option value="Failed" class="text-rose-600 font-bold">Failed</option>
+                            <option value="Pending" class="text-amber-600 font-bold">Pending / Untested</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Severity</label>
+                        <select id="form-severity" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none font-semibold">
+                            <option value="Minor">Minor</option>
+                            <option value="Major">Major</option>
+                            <option value="Critical" class="text-rose-600 font-bold">Critical</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="dynamic-form-fields" class="space-y-4"></div>
+
+                <div id="wrapper-form-step">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Wording / Step Pengetesan</label>
+                    <textarea id="form-step" rows="2" placeholder="Detail langkah pengetesan..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5" id="evidence-label-text">
+                            <i data-lucide="image" class="w-4 h-4 text-sky-600"></i> Evidence Testing
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-normal" id="evidence-hint-text">Auto-Compressing Active</span>
+                    </label>
+                    <input type="file" id="form-evidence-file" onchange="handleFileUpload(this)" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-100 file:text-sky-700 hover:file:bg-sky-200 transition">
+                    
+                    <div id="compress-loading" class="hidden p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] font-semibold flex items-center gap-2">
+                        <div class="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span id="compress-loading-text">Sedang mengompres file evidence... Mohon tunggu.</span>
+                    </div>
+
+                    <div id="evidence-preview-container" class="hidden mt-2 pt-2 border-t border-slate-200 flex items-center justify-between">
+                        <div id="evidence-preview-content" class="flex items-center gap-2"></div>
+                        <button type="button" onclick="removeEvidence()" class="text-xs text-rose-600 hover:underline flex items-center gap-1 font-medium">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Issue</label>
+                    <textarea id="form-desc" rows="2" placeholder="Tuliskan kendala jika ada..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Propose</label>
+                    <textarea id="form-propose" rows="2" placeholder="Tuliskan usulan solusi perbaikan..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">Batal</button>
+                    <button type="submit" id="btn-save-submit" class="px-5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-4 h-4"></i> Simpan Hasil Test
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PREVIEW EVIDENCE MEDIA -->
+    <div id="media-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden max-w-3xl w-full border border-slate-700 flex flex-col">
+            <div class="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center text-white">
+                <h4 class="font-bold text-xs flex items-center gap-2" id="media-modal-title"><i data-lucide="file-media" class="w-4 h-4"></i> Evidence Media Preview</h4>
+                <button onclick="closeMediaModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-4 flex items-center justify-center bg-black/50 max-h-[75vh] overflow-auto" id="media-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC TERPISAH -->
+    <script src="app.js"></script>
+</body>
+</html>

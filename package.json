@@ -1,0 +1,16 @@
+{
+  "name": "avindha-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AVINDHA - Automated Verification Dashboard Assurance (Vercel + Postgres)",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "setup-db": "node --env-file=.env.local scripts/setup-db.js",
+    "create-user": "node --env-file=.env.local scripts/create-user.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
