@@ -1182,6 +1182,14 @@ function onSubMenuChange() {
     }
 }
 
+function onSubMenuChange() {
+    const statusVal = document.getElementById('ivr-step-1')?.value;
+    removeStepsAfter(2);
+    if (statusVal === "Press 0 Untuk Berbicara dengan Caroline Officer") {
+        renderStepSelect("step-3", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
+    }
+}
+
 function onPrepaidRegulerNIK() {
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIKVerif()");
 }
