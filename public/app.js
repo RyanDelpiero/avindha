@@ -1163,9 +1163,10 @@ function onMenuCategoryChange() {
     } else if (category === "Press 4 Keluhan") {
         renderStepSelect("step-1", "Step 1 : ", ["Kendala Internet", "Kendala Aktivasi Paket", "Berbicara dengan Caroline Officer","Kembali ke Menu Sebelumnya", "Kembali ke Menu Utama"], "onComplainStep2Change()");
         renderStepSelect("step-2", "Step 2 : ", ["Berbicara dengan Caroline Officer","Kembali ke Menu Sebelumnya", "Kembali ke Menu Utama"]);
-    } else {
-        renderStepSelect("step-1", "Step 1 : Layanan Navigasi", ["Informasi Layanan", "Pengaduan Layanan"]);
-    }
+    } 
+    // else {
+    //     renderStepSelect("step-1", "Step 1 : Layanan Navigasi", ["Informasi Layanan", "Pengaduan Layanan"]);
+    // }
 }
 
 // Handler Alur Prepaid
