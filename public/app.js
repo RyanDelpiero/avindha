@@ -1149,16 +1149,10 @@ function onMenuCategoryChange() {
         renderStepSelect("step-1", "Step 1 : Escalation", ["Press 0 Berbicara dengan Caroline Officer"]);
     } 
     // --- MENU DEFAULT / PRABAYAR ---
-    // else if (category === "Press 1 Pembelian Paket") {
-    //     // renderStepSelect("step-1", "Sub Menu :", ["Internet Super Seru", "Perpanjangan Masa Aktif", "RoaMAX Umroh 10GB 17 Hari"]);
-    //     renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"]);
-    //     renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"], "onHaloRegulerPress1Change()");
+   
    else if (category === "Press 1 Pembelian Paket") {
-        renderStepSelect("step-1", "Sub Menu :", [
-            "Press 1 Perpanjangan Masa Aktif", 
-            "Press 0 Untuk Berbicara dengan Caroline Officer"
-        ], "onSubMenuChange()");
-        // renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil", "Aktivasi Gagal"]);
+        renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onSubMenuChange()");
+        renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil", "Aktivasi Gagal"]);
     } else if (category === "Press 2 Informasi Nomor PUK") {
         renderStepSelect("step-1", "Step 1 : Input NIK diakhir dgn #", ["Masukkan NIK KTP"]);
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIK()");
@@ -1178,24 +1172,13 @@ function onMenuCategoryChange() {
 // Handler Alur Prepaid
 
 function onSubMenuChange() {
-    // Ambil nilai dari elemen step-1 dengan benar (sesuaikan ID elemen jika memakai 'ivr-step-1')
     const selectedSubMenu = document.getElementById('ivr-step-1')?.value || document.getElementById('step-1')?.value;
-    
-    // Cari elemen kontainer untuk step-2 (Konfirmasi Status)
     const step2Element = document.getElementById('step-2')?.closest('.form-group') || document.getElementById('step-2'); 
-
     if (selectedSubMenu === "Press 0 Untuk Berbicara dengan Caroline Officer") {
-        // Jika pilih Caroline Officer, sembunyikan step-2 dan tampilkan tindak lanjut
         if (step2Element) step2Element.style.display = 'none';
-        
-        // Render step berikutnya jika diperlukan
         renderStepSelect("step-4", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
     } else {
-        // Jika pilih Perpanjangan Masa Aktif, tampilkan kembali step-2
-        if (step2Element) step2Element.style.display = 'block';
-        
-        // Hapus step tindak lanjut jika ada
-        // removeStepsAfter(2); 
+        if (step2Element) step2Element.style.display = 'block'; 
     }
 }
 
