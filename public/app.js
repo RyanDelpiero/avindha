@@ -1155,7 +1155,7 @@ function onMenuCategoryChange() {
     //     renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"], "onHaloRegulerPress1Change()");
     else if (category === "Press 1 Pembelian Paket") {
         renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onSubMenuChange()");
-        // renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"]);
+        renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"]);
     } else if (category === "Press 2 Informasi Nomor PUK") {
         renderStepSelect("step-1", "Step 1 : Input NIK diakhir dgn #", ["Masukkan NIK KTP"]);
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIK()");
@@ -1175,17 +1175,11 @@ function onMenuCategoryChange() {
 // Handler Alur Prepaid
 
 function onSubMenuChange() {
-    const selectedSubMenu = document.getElementById("step-1").value; // Sesuaikan selector elemen step-1 Anda
-    if (selectedSubMenu === "Press 1 Perpanjangan Masa Aktif") {
-        // Tampilkan konfirmasi status hanya jika memilih perpanjangan masa aktif
-        renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil", "Aktivasi Gagal"], "onHaloRegulerPress1Change()");
-    } else {
-        // Kosongkan atau sembunyikan step-2 jika memilih berbicara dengan Caroline Officer
-        const step2Container = document.getElementById("step-2-container"); // Sesuaikan dengan container elemen step-2 Anda
-        if (step2Container) {
-            step2Container.innerHTML = ""; 
-        }
-    }
+    const statusVal = document.getElementById('ivr-step-1')?.value;
+    // removeStepsAfter(2);
+    if (selectedSubMenu === "Press 0 Untuk Berbicara dengan Caroline Officer") {
+        renderStepSelect("step-4", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
+    } 
 }
 
 function onPrepaidRegulerNIK() {
