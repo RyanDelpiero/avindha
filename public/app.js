@@ -1163,15 +1163,42 @@ function onMenuCategoryChange() {
         renderStepSelect("step-1", "Step 1 : Informasi Ganti Kartu", ["Informasi Ganti Kartu OK", "Informasi Ganti Kartu Not OK"]);
         renderStepSelect("step-2", "Step 2 : Escalation", ["Press 0 Berbicara dengan Caroline Officer","Press 7 Kembali ke Menu Utama"]);
     } else if (category === "Press 4 Keluhan") {
-        renderStepSelect("step-1", "Step 1 : ", ["Kendala Internet", "Kendala Aktivasi Paket", "Berbicara dengan Caroline Officer","Kembali ke Menu Sebelumnya", "Kembali ke Menu Utama"], "onComplainStep2Change()");
-        renderStepSelect("step-2", "Step 2 : ", ["Berbicara dengan Caroline Officer","Kembali ke Menu Sebelumnya", "Kembali ke Menu Utama"]);
-    } 
+        renderStepSelect("step-1", "Step 1 : ", [
+            "Kendala Internet", 
+            "Kendala Aktivasi Paket", 
+            "Berbicara dengan Caroline Officer", 
+            "Kembali ke Menu Sebelumnya", 
+            "Kembali ke Menu Utama"
+        ], "onKeluhanStep1Change()");
+    }
     // else {
     //     renderStepSelect("step-1", "Step 1 : Layanan Navigasi", ["Informasi Layanan", "Pengaduan Layanan"]);
     // }
 }
 
 // Handler Alur Prepaid
+
+function onKeluhanStep1Change() {
+    // Ambil nilai dari step-1
+    const step1Val = document.getElementById('step-1')?.value || document.getElementById('ivr-step-1')?.value;
+    
+    // Bersihkan langkah di bawahnya jika user mengubah pilihan
+    removeStepsAfter(1);
+
+    if (step1Val === "Kendala Internet" || step1Val === "Kendala Aktivasi Paket") {
+        // Jika pilih kendala, tampilkan Step 2 lanjutan jika diperlukan
+        renderStepSelect("step-2", "Step 2 : ", [
+            "Berbicara dengan Caroline Officer", 
+            "Kembali ke Menu Sebelumnya", 
+            "Kembali ke Menu Utama"
+        ]);
+    } else {
+        // Jika langsung memilih Caroline Officer, Kembali ke Menu Sebelumnya, atau Menu Utama di Step 1,
+        // maka step-2 dikosongkan (tidak perlu dirender pilihan tambahan).
+        const step2Container = document.getElementById('step-2')?.closest('.form-group') || document.getElementById('step-2');
+        if (step2Container) step2Container.style.display = 'none';
+    }
+}
 
 function onSubMenuChange() {
     // Ambil nilai dari step-1 (Sub Menu)
