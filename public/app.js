@@ -1152,7 +1152,7 @@ function onMenuCategoryChange() {
     else if (category === "Press 1 Pembelian Paket") {
         // renderStepSelect("step-1", "Sub Menu :", ["Internet Super Seru", "Perpanjangan Masa Aktif", "RoaMAX Umroh 10GB 17 Hari"]);
         renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrepaidRegulerNIK()");
-        renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"], "onHaloRegulerPress1Change()");
+        // renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"], "onHaloRegulerPress1Change()");
     } else if (category === "Press 2 Informasi Nomor PUK") {
         renderStepSelect("step-1", "Step 1 : Input NIK diakhir dgn #", ["Masukkan NIK KTP"]);
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIK()");
