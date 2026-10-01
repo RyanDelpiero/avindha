@@ -1150,9 +1150,11 @@ function onMenuCategoryChange() {
     } 
     // --- MENU DEFAULT / PRABAYAR ---
     else if (category === "Press 1 Pembelian Paket") {
-        // renderStepSelect("step-1", "Sub Menu :", ["Internet Super Seru", "Perpanjangan Masa Aktif", "RoaMAX Umroh 10GB 17 Hari"]);
-        renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrabayarRegulerPress1Change()");
-        // renderStepSelect("step-2", "Konfirmasi Status :", ["Aktivasi Berhasil","Aktivasi Gagal"], "onHaloRegulerPress1Change()");
+        // Ketika memilih Menu Utama "Press 1 Pembelian Paket", tampilkan Sub Menu di step-1
+        renderStepSelect("step-1", "Sub Menu :", [
+            "Press 1 Perpanjangan Masa Aktif", 
+            "Press 0 Untuk Berbicara dengan Caroline Officer"
+        ], "onSubMenuChange()");
     } else if (category === "Press 2 Informasi Nomor PUK") {
         renderStepSelect("step-1", "Step 1 : Input NIK diakhir dgn #", ["Masukkan NIK KTP"]);
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIK()");
@@ -1171,17 +1173,35 @@ function onMenuCategoryChange() {
 
 // Handler Alur Prepaid
 
-function onPrabayarRegulerPress1Change() {
-        renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrabayarRegulerAktivasiStatusChange()");
+function onSubMenuChange() {
+    // Ambil nilai dari step-1 (Sub Menu)
+    const subMenuVal = document.getElementById('step-1')?.value || document.getElementById('ivr-step-1')?.value;
+    // Bersihkan langkah setelah step-1 jika user mengubah pilihan
+    removeStepsAfter(1);
+    if (subMenuVal === "Press 1 Perpanjangan Masa Aktif") {
+        // Skenario 1 & 2: Jika pilih perpanjangan, tampilkan Step 2 (Status Aktivasi)
+        renderStepSelect("step-2", "Konfirmasi Status :", [
+            "Aktivasi Berhasil", 
+            "Aktivasi Gagal"
+        ], "onAktivasiStatusChange()");
+    } 
+    // Skenario 3: Jika pilih Caroline Officer, tidak ada pilihan status (berhenti di sini / sesuai ekspektasi)
 }
 
-function onPrabayarRegulerAktivasiStatusChange() {
-    const statusVal = document.getElementById('ivr-step-2')?.value;
+function onAktivasiStatusChange() {
+    // Ambil nilai dari step-2 (Konfirmasi Status)
+    const statusVal = document.getElementById('step-2')?.value || document.getElementById('ivr-step-2')?.value;
+    // Bersihkan langkah setelah step-2
     removeStepsAfter(2);
-    if (statusVal === "Press 0 Untuk Berbicara dengan Caroline Officer") {
-        renderStepSelect("step-2", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
+    if (statusVal === "Aktivasi Gagal") {
+        // Skenario 2: Jika Aktivasi Gagal, munculkan Step 3 (Tindak Lanjut ke Agent)
+        renderStepSelect("step-3", "Tindak Lanjut :", [
+            "Dihubungkan ke Agent"
+        ]);
     }
+    // Skenario 1: Jika "Aktivasi Berhasil", tidak perlu merender apa-apa lagi di bawahnya.
 }
+
 
 function onPrepaidRegulerNIK() {
         renderStepSelect("step-2", "Step 2 : NIK Terverifikasi", ["Verified", "Not Verified"], "onPrepaidRegulerNIKVerif()");
