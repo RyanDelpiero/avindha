@@ -1171,7 +1171,7 @@ function onMenuCategoryChange() {
 
 // Handler Alur Prepaid
 
-function onPrabayarRegulerPress1Change()
+function onPrabayarRegulerPress1Change() {
         renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrabayarRegulerChange()");
 }
 
