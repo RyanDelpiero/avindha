@@ -1172,14 +1172,14 @@ function onMenuCategoryChange() {
 // Handler Alur Prepaid
 
 function onPrabayarRegulerPress1Change() {
-        renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrabayarRegulerChange()");
+        renderStepSelect("step-1", "Sub Menu :", ["Press 1 Perpanjangan Masa Aktif", "Press 0 Untuk Berbicara dengan Caroline Officer"], "onPrabayarRegulerAktivasiStatusChange()");
 }
 
-function onPrabayarRegulerChange() {
-    const statusVal = document.getElementById('ivr-step-1')?.value;
+function onPrabayarRegulerAktivasiStatusChange() {
+    const statusVal = document.getElementById('ivr-step-2')?.value;
     removeStepsAfter(2);
     if (statusVal === "Press 0 Untuk Berbicara dengan Caroline Officer") {
-        renderStepSelect("step-1", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
+        renderStepSelect("step-2", "Tindak Lanjut :", ["Dihubungkan ke Agent"]);
     }
 }
 
